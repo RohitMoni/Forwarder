@@ -6,8 +6,7 @@ namespace Forwarder.Sample;
 
 public partial class ClassA
 {
-    [Forward]
-    public ClassB _b = new();
+    [Forward] private readonly ClassB _b = new();
 }
 
 public class ClassB
