@@ -57,7 +57,7 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
         var apiList = BuildForwardedApiInfoListFor(fieldSymbol.Type);
 
         return new ForwardedMemberInfo(
-            context.TargetSymbol.ContainingNamespace.Name,
+            context.TargetSymbol.ContainingNamespace.ToString(),
             context.TargetSymbol.ContainingType.Name,
             context.TargetSymbol.Name,
             apiList

@@ -6,7 +6,7 @@ public class BasicForward : BaseGeneratorTestData
         """
         using Forwarder;
 
-        namespace TestNamespace;
+        namespace Forwarder.Sample;
 
         public partial class ClassA
         {
@@ -25,7 +25,7 @@ public class BasicForward : BaseGeneratorTestData
 
     public override string GetExpectedSource() => 
         """
-        namespace TestNamespace;
+        namespace Forwarder.Sample;
 
         public partial class ClassA
         {
