@@ -67,21 +67,35 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
     private static List<ApiInfo> BuildForwardedApiInfoListFor(ITypeSymbol member)
     {
         var apiList = new List<ApiInfo>();
+        var symbolsToScan = new Queue<ITypeSymbol>();
+        symbolsToScan.Enqueue(member);
 
-        // Iterate over all public members of the target field/property
-        foreach (var memberSymbol in member.GetMembers().Where(m => m.DeclaredAccessibility == Accessibility.Public))
+        while (symbolsToScan.Count > 0)
         {
-            // Only forwarding methods
-            if (memberSymbol is not IMethodSymbol methodSymbol) continue;
-            if (methodSymbol.MethodKind is not MethodKind.Ordinary) continue;
+            var toScan = symbolsToScan.Dequeue();
 
-            // Collect info
-            var methodName = methodSymbol.Name;
-            var parameterUsageString = methodSymbol.Parameters.Select(p => GetParameterUsageString(p)).ToList();
-            var fullSignature = GetMethodDeclarationString(methodSymbol);
+            // Iterate over all public members of the target field/property
+            foreach (var memberSymbol in toScan.GetMembers())
+            {
+                // Check for fields with the same attribute for nested scanning
+                // Todo: use the same conditional logic for validating if a symbol is valid everywhere (IsValidSyntaxNode)
+                if (memberSymbol is IFieldSymbol fieldSymbol && 
+                    fieldSymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == ForwardAttributeSourceProvider.AttributeName))
+                    symbolsToScan.Enqueue(fieldSymbol.Type);
 
-            // Add method information to the API list
-            apiList.Add(new ApiInfo(fullSignature, methodName, parameterUsageString));
+                // Only forwarding public methods
+                if (memberSymbol.DeclaredAccessibility != Accessibility.Public) continue;
+                if (memberSymbol is not IMethodSymbol methodSymbol) continue;
+                if (methodSymbol.MethodKind is not MethodKind.Ordinary) continue;
+
+                // Collect info
+                var methodName = methodSymbol.Name;
+                var parameterUsageString = methodSymbol.Parameters.Select(GetParameterUsageString).ToList();
+                var fullSignature = GetMethodDeclarationString(methodSymbol);
+
+                // Add method information to the API list
+                apiList.Add(new ApiInfo(fullSignature, methodName, parameterUsageString));
+            }
         }
 
         return apiList;

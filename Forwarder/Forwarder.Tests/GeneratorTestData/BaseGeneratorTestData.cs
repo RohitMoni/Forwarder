@@ -5,8 +5,8 @@ namespace Forwarder.Tests.GeneratorTestData;
 
 public abstract class BaseGeneratorTestData : IEnumerable<object[]>
 {
-    public abstract string GetOriginSource();
-    public abstract string GetExpectedSource();
+    public abstract string[] GetOriginSource();
+    public abstract string[] GetExpectedSource();
 
     public IEnumerator<object[]> GetEnumerator()
     {

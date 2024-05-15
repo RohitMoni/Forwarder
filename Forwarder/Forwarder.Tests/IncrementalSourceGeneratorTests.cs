@@ -11,28 +11,31 @@ public class IncrementalSourceGeneratorTests
     [Theory]
     [ClassData(typeof(BasicForward))]
     [ClassData(typeof(ParameterModifiers))]
-    public void IncrementalGenerator_Generates_ExpectedSourceText(string originSource, string expectedGeneratedSource)
+    [ClassData(typeof(NestedForward))]
+    public void IncrementalGenerator_Generates_ExpectedSourceText(string[] originSource, string[] expectedGeneratedSource)
     {
         var generator = new IncrementalSourceGenerator();
 
         var driver = CSharpGeneratorDriver.Create(generator);
 
         var compilation = CSharpCompilation.Create(nameof(IncrementalSourceGeneratorTests),
-            [CSharpSyntaxTree.ParseText(originSource)],
+            [..originSource.Select(s => CSharpSyntaxTree.ParseText(s))],
             new[]
             {
                 // To support 'System.Attribute' inheritance, add reference to 'System.Private.CoreLib'.
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location)
             });
 
-        // Run generators and retrieve all results.
         var runResult = driver.RunGenerators(compilation).GetRunResult();
 
-        // All generated files can be found in 'RunResults.GeneratedTrees'.
-        var generatedFileSyntax = runResult.GeneratedTrees.Single(t => t.FilePath.EndsWith("_Forwarded.g.cs"));
-        var generatedSourceText = generatedFileSyntax.GetText().ToString();
+        // +1 to account for the generated attribute code file
+        Assert.Equal(expectedGeneratedSource.Length + 1, runResult.GeneratedTrees.Length);
+        var generatedFileSyntax = runResult.GeneratedTrees.Where(t => t.FilePath.EndsWith("_Forwarded.g.cs"));
+        var generatedSourceText = generatedFileSyntax.Select(g => g.GetText().ToString()).ToArray();
 
-        // Complex generators should be tested using text comparison.
-        Assert.Equal(expectedGeneratedSource, generatedSourceText, ignoreLineEndingDifferences: true);
+        for (var i = 0; i < expectedGeneratedSource.Length; ++i)
+        {
+            Assert.Equal(expectedGeneratedSource[i], generatedSourceText[i], ignoreLineEndingDifferences: true);
+        }
     }
 }
