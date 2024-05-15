@@ -76,22 +76,38 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
             if (methodSymbol.MethodKind is not MethodKind.Ordinary) continue;
 
             // Collect info
-            var returnType = methodSymbol.ReturnType.ToString();
             var methodName = methodSymbol.Name;
-            var parameterList = string.Join(", ", methodSymbol.Parameters.Select(p => $"{p.Type} {p.Name}"));
-            var parameterNames = methodSymbol.Parameters.Select(p => p.Name).ToList();
-            var fullSignature = $"public {returnType} {methodName}({parameterList})";
+            var parameterUsageString = methodSymbol.Parameters.Select(p => GetParameterUsageString(p)).ToList();
+            var fullSignature = GetMethodDeclarationString(methodSymbol);
 
             // Add method information to the API list
-            apiList.Add(new ApiInfo(fullSignature, methodName, parameterNames));
+            apiList.Add(new ApiInfo(fullSignature, methodName, parameterUsageString));
         }
 
         return apiList;
+
+        string GetParameterUsageString(IParameterSymbol symbol)
+        {
+            if (symbol.RefKind == RefKind.Out)
+                return $"out {symbol.Name}";
+            else if (symbol.RefKind == RefKind.Ref)
+                return $"ref {symbol.Name}";
+            else
+                return symbol.Name;
+        }
+
+        string GetMethodDeclarationString(IMethodSymbol symbol)
+        {
+            var syntaxNode = (MethodDeclarationSyntax)symbol.DeclaringSyntaxReferences.Single().GetSyntax();
+            var declarationOnly = syntaxNode.WithExpressionBody(null).WithSemicolonToken(default);
+            var ret = declarationOnly.ToString();
+            return ret;
+        }
     }
 
     private static string GenerateSourceHint(ForwardedMemberInfo info)
     {
-        return $"{info.ContainingTypeName}_{info.MemberName}_Forwarded.g.cs";
+        return $"{info.ContainingTypeNamespace}.{info.ContainingTypeName}.{info.MemberName}_Forwarded.g.cs";
     }
 
     private static string GenerateSourceString(ForwardedMemberInfo info)
@@ -107,7 +123,7 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
 
         foreach (var api in info.ApiInfos)
         {
-            sb.AppendLine($"    {api.FullSignature} => {info.MemberName}.{api.MethodName}({string.Join(", ", api.ParameterNames)});");
+            sb.AppendLine($"    {api.FullSignature} => {info.MemberName}.{api.MethodName}({string.Join(", ", api.ParameterUsageStrings)});");
         }
 
         sb.AppendLine("}");
@@ -124,7 +140,7 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
     private record struct ApiInfo(
         string FullSignature,
         string MethodName, 
-        List<string> ParameterNames
+        List<string> ParameterUsageStrings
     );
 }
 

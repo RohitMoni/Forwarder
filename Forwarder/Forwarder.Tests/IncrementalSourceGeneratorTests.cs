@@ -10,6 +10,7 @@ public class IncrementalSourceGeneratorTests
 {
     [Theory]
     [ClassData(typeof(BasicForward))]
+    [ClassData(typeof(ParameterModifiers))]
     public void IncrementalGenerator_Generates_ExpectedSourceText(string originSource, string expectedGeneratedSource)
     {
         var generator = new IncrementalSourceGenerator();

@@ -1,12 +1,12 @@
 ﻿namespace Forwarder.Tests.GeneratorTestData;
 
-public class BasicForward : BaseGeneratorTestData
+public class ParameterModifiers : BaseGeneratorTestData
 {
     public override string GetOriginSource() =>
         """
         using Forwarder;
 
-        namespace Forwarder.Samples.BasicForward;
+        namespace Forwarder.Samples;
 
         public partial class ClassA
         {
@@ -18,19 +18,19 @@ public class BasicForward : BaseGeneratorTestData
         {
             private int _integer;
         
-            public int GetStored() => _integer;
-            public void Store(int value) => _integer = value;
+            public void GetStored(out int stored) => stored = _integer;
+            public void Store(ref int value) => _integer = value;
         }
         """;
 
     public override string GetExpectedSource() => 
         """
-        namespace Forwarder.Samples.BasicForward;
+        namespace Forwarder.Samples;
 
         public partial class ClassA
         {
-            public int GetStored() => _b.GetStored();
-            public void Store(int value) => _b.Store(value);
+            public void GetStored(out int stored) => _b.GetStored(stored);
+            public void Store(ref int value) => _b.Store(value);
         }
 
         """;

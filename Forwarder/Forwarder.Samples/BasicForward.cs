@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Forwarder.Sample;
+namespace Forwarder.Samples.BasicForward;
 
 public partial class ClassA
 {
