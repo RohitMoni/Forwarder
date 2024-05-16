@@ -6,6 +6,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forwarder.Samples", "Forwar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Forwarder.Tests", "Forwarder\Forwarder.Tests\Forwarder.Tests.csproj", "{91AD02C0-9D8A-48B3-B5F9-271F7303C88A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Meta", "Meta", "{7D5B4111-5EDD-4148-AF97-CE3BA5906144}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
