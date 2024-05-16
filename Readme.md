@@ -50,3 +50,4 @@ This works using Roslyn Source Generators. Current requirements: C# version ? / 
 4. Enhancement: allow forwarding of `internal` methods.
 5. Enhancement: augment `[Forward]` to allow selective forwarding of specific APIs.
 6. Bugfix: skip composed APIs that already exist in the composite.
+7. Bugfix: make sure all parameter modifiers work as expected
