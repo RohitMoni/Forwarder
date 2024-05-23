@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Forwarder.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -143,18 +144,4 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
         sb.AppendLine("}");
         return sb.ToString();
     }
-
-    private record struct ForwardedMemberInfo(
-        string ContainingTypeNamespace,
-        string ContainingTypeName,
-        string MemberName,
-        List<ApiInfo> ApiInfos
-    );
-
-    private record struct ApiInfo(
-        string FullSignature,
-        string MethodName, 
-        List<string> ParameterUsageStrings
-    );
 }
-
