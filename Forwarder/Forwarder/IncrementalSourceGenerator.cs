@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading;
 using Forwarder.Model;
@@ -54,8 +56,13 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
 
     private static ForwardedMemberInfo TransformToForwardedMemberInfo(GeneratorAttributeSyntaxContext context, CancellationToken _)
     {
-        var fieldSymbol = (IFieldSymbol)context.TargetSymbol;
-        var apiList = BuildForwardedApiInfoListFor(fieldSymbol.Type);
+        var attributeData = context.Attributes.Single();
+        var accessModifier = GetAttributeParameterData(attributeData,
+                ForwardAttributeSourceProvider.AccessModifierParameterIndex,
+                ForwardAttributeSourceProvider.AccessModifierParameterName,
+                ForwardAttributeSourceProvider.AccessModifierDefault);
+        var forwardedSymbol = (IFieldSymbol) context.TargetSymbol;
+        var apiList = BuildForwardedApiInfoListFor(forwardedSymbol, accessModifier);
 
         return new ForwardedMemberInfo(
             context.TargetSymbol.ContainingNamespace.ToString(),
@@ -65,11 +72,13 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
         );
     }
 
-    private static List<ApiInfo> BuildForwardedApiInfoListFor(ITypeSymbol member)
+    private static List<ApiInfo> BuildForwardedApiInfoListFor(IFieldSymbol field, AccessModifier accessModifier)
     {
         var apiList = new List<ApiInfo>();
+
+        // Support nested forwarding. Using a queue to avoid recursion.
         var symbolsToScan = new Queue<ITypeSymbol>();
-        symbolsToScan.Enqueue(member);
+        symbolsToScan.Enqueue(field.Type);
 
         while (symbolsToScan.Count > 0)
         {
@@ -79,13 +88,11 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
             foreach (var memberSymbol in toScan.GetMembers())
             {
                 // Check for fields with the same attribute for nested scanning
-                // Todo: use the same conditional logic for validating if a symbol is valid everywhere (IsValidSyntaxNode)
                 if (memberSymbol is IFieldSymbol fieldSymbol && 
                     fieldSymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == ForwardAttributeSourceProvider.AttributeName))
                     symbolsToScan.Enqueue(fieldSymbol.Type);
 
-                // Only forwarding public methods
-                if (memberSymbol.DeclaredAccessibility != Accessibility.Public) continue;
+                if (!AccessibilityMatches(memberSymbol.DeclaredAccessibility, accessModifier)) continue;
                 if (memberSymbol is not IMethodSymbol methodSymbol) continue;
                 if (methodSymbol.MethodKind is not MethodKind.Ordinary) continue;
 
@@ -118,8 +125,41 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
             var ret = declarationOnly.ToString();
             return ret;
         }
+
+        bool AccessibilityMatches(Accessibility declared, AccessModifier allowed)
+        {
+            switch (declared)
+            {
+                case Accessibility.Public when allowed.HasFlag(AccessModifier.Public):
+                case Accessibility.Internal when allowed.HasFlag(AccessModifier.Internal):
+                    return true;
+                case Accessibility.NotApplicable:
+                case Accessibility.Private:
+                case Accessibility.ProtectedAndInternal:
+                case Accessibility.Protected:
+                case Accessibility.ProtectedOrInternal:
+                default:
+                    return false;
+            }
+        }
     }
 
+    private static T? GetAttributeParameterData<T>(AttributeData attrData, int constructorArgumentIndex, string parameterName, T defaultValue)
+    {
+        if (attrData.ConstructorArguments.Length > constructorArgumentIndex)
+        {
+            return (T?)attrData.ConstructorArguments[constructorArgumentIndex].Value;
+        }
+
+        var named = attrData.NamedArguments.FirstOrDefault(arg => arg.Key == parameterName);
+        if (!named.Equals(default(KeyValuePair<string, TypedConstant>)))
+        {
+            return (T?)named.Value.Value;
+        }
+
+        return defaultValue;
+    }
+    
     private static string GenerateSourceHint(ForwardedMemberInfo info)
     {
         return $"{info.ContainingTypeNamespace}.{info.ContainingTypeName}.{info.MemberName}_Forwarded.g.cs";

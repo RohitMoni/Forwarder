@@ -39,15 +39,18 @@ This works using Roslyn Source Generators. Current requirements: C# version ? / 
 1. Composites must be declared `partial` to enable adding APIs to it.
 2. `[Forward]` can only be declared on fields.
 3. The field must declare a single member only (ex: `[Forward] MyClass a, b;` is not permitted).
-4. (Intended, currently broken) If the Composite already has an API with an identical signature to a forwarded composed member API, that API is not not forwarded.
+4. (Intended, currently broken) If the Composite already has an API with an identical signature to a forwarded composed member API, that API is not forwarded.
 5. Nested `[Forward]`s are allowed (Ex: A -> B -> C). (Note: circular forward references will break)
+
+## Done
+
+* Enhancement: allow forwarding of `internal` methods.
 
 ## Todo
 
-1. Analyzer: error when using the `[Forward]` attribute on a field with multiple declarations
-2. Bugfix + Analyzer: error when using the `[Forward]` attribute on multiple composed members of the same type (on separate lines)
-3. Bugfix: handle circular composed references.
-4. Enhancement: allow forwarding of `internal` methods.
-5. Enhancement: augment `[Forward]` to allow selective forwarding of specific APIs.
-6. Bugfix: skip composed APIs that already exist in the composite.
-7. Bugfix: make sure all parameter modifiers work as expected
+* Analyzer: error when using the `[Forward]` attribute on a field with multiple declarations
+* Bugfix + Analyzer: error when using the `[Forward]` attribute on multiple composed members of the same type (on separate lines)
+* Bugfix: handle circular composed references.
+* Enhancement: augment `[Forward]` to allow selective forwarding of specific APIs.
+* Bugfix: skip composed APIs that already exist in the composite.
+* Bugfix: make sure all parameter modifiers work as expected

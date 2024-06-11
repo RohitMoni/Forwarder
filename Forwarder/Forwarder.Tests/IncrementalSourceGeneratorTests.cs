@@ -10,8 +10,10 @@ public class IncrementalSourceGeneratorTests
 {
     [Theory]
     [ClassData(typeof(BasicForward))]
-    [ClassData(typeof(ParameterModifiers))]
+    [ClassData(typeof(InternalForward))]
     [ClassData(typeof(NestedForward))]
+    [ClassData(typeof(ParameterModifiers))]
+    [ClassData(typeof(PublicAndInternalForward))]
     public void IncrementalGenerator_Generates_ExpectedSourceText(string[] originSource, string[] expectedGeneratedSource)
     {
         var generator = new IncrementalSourceGenerator();
