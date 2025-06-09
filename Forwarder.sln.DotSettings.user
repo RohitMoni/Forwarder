@@ -1,6 +1,6 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=04fd699b_002Db409_002D4c8e_002D8b7b_002D7c96a7538c74/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="IncrementalSourceGeneratorTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::91AD02C0-9D8A-48B3-B5F9-271F7303C88A::net8.0::Forwarder.Tests.IncrementalSourceGeneratorTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=08351f49_002D34ce_002D434f_002Dab73_002D6e38694de05c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="IncrementalGenerator_Generates_ExpectedSourceText" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::91AD02C0-9D8A-48B3-B5F9-271F7303C88A::net8.0::Forwarder.Tests.IncrementalSourceGeneratorTests.IncrementalGenerator_Generates_ExpectedSourceText&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
