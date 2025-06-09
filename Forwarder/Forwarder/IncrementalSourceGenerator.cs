@@ -178,7 +178,7 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
 
         foreach (var api in info.ApiInfos)
         {
-            sb.AppendLine($"    {api.FullSignature} => {info.MemberName}.{api.MethodName}({string.Join(", ", api.ParameterUsageStrings)});");
+            //sb.AppendLine($"    {api.FullSignature} => {info.MemberName}.{api.MethodName}({string.Join(", ", api.ParameterUsageStrings)});");
         }
 
         sb.AppendLine("}");
