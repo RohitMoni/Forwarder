@@ -78,7 +78,12 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
 
         // Support nested forwarding. Using a queue to avoid recursion.
         var symbolsToScan = new Queue<ITypeSymbol>();
-        symbolsToScan.Enqueue(field.Type);
+        var visitedSymbols = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+
+        if (visitedSymbols.Add(field.Type))
+        {
+            symbolsToScan.Enqueue(field.Type);
+        }
 
         while (symbolsToScan.Count > 0)
         {
@@ -88,9 +93,12 @@ public class IncrementalSourceGenerator : IIncrementalGenerator
             foreach (var memberSymbol in toScan.GetMembers())
             {
                 // Check for fields with the same attribute for nested scanning
-                if (memberSymbol is IFieldSymbol fieldSymbol && 
-                    fieldSymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == ForwardAttributeSourceProvider.AttributeName))
+                if (memberSymbol is IFieldSymbol fieldSymbol &&
+                    fieldSymbol.GetAttributes().Any(attr => attr.AttributeClass?.Name == ForwardAttributeSourceProvider.AttributeName) &&
+                    visitedSymbols.Add(fieldSymbol.Type))
+                {
                     symbolsToScan.Enqueue(fieldSymbol.Type);
+                }
 
                 if (!AccessibilityMatches(memberSymbol.DeclaredAccessibility, accessModifier)) continue;
                 if (memberSymbol is not IMethodSymbol methodSymbol) continue;
